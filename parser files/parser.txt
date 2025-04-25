@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -10,7 +11,7 @@ namespace JASON_Compiler
     public class Node
     {
         public List<Node> Children = new List<Node>();
-        
+
         public string Name;
         public Node(string N)
         {
@@ -21,28 +22,254 @@ namespace JASON_Compiler
     {
         int InputPointer = 0;
         List<Token> TokenStream;
-        public  Node root;
-        
+        public Node root;
+
+        /* MORSI BLOCK - DO NOT EDIT UNTIL END OF BLOCK */
+
         public Node StartParsing(List<Token> TokenStream)
         {
             this.InputPointer = 0;
             this.TokenStream = TokenStream;
-            root = new Node("Program");
-            root.Children.Add(Program());
+            root = Program();
             return root;
         }
+
         Node Program()
         {
             Node program = new Node("Program");
-            program.Children.Add(FunctionHeader());
-            //program.Children.Add(VarDecls());
-            // program.Children.Add(DeclSec());
-            // program.Children.Add(Block());
-            //program.Children.Add(match(Token_Class.Dot));
-            MessageBox.Show("Success");
+
+            program.Children.Add(Function_Statements());
+            program.Children.Add(Main_Function());
+
             return program;
         }
-        
+
+
+        Node Function_Statements()
+        {
+            Node function_statements = new Node("Function_Statements");
+            function_statements.Children.Add(Function_StatementsDash());
+            return function_statements;
+        }
+
+        Node Function_StatementsDash()
+        {
+            Node function_statementsdash = new Node("Function_StatementsDash");
+
+            // trace back this condition to the Datatype in Function_Declaration
+            if (InputPointer < TokenStream.Count && (TokenStream[InputPointer].token_type == Token_Class.T_INT || TokenStream[InputPointer].token_type == Token_Class.T_FLOAT || TokenStream[InputPointer].token_type == Token_Class.T_STRING))
+            { 
+                function_statementsdash.Children.Add(Function_Statement());
+                Function_StatementsDash_AUX(function_statementsdash);
+            }
+
+            return function_statementsdash;
+        }
+
+        void Function_StatementsDash_AUX(Node function_statementsdash)
+        {
+            // trace back this condition to the Datatype in Function_Declaration
+            if (InputPointer < TokenStream.Count && (TokenStream[InputPointer].token_type == Token_Class.T_INT || TokenStream[InputPointer].token_type == Token_Class.T_FLOAT || TokenStream[InputPointer].token_type == Token_Class.T_STRING))
+            {
+                function_statementsdash.Children.Add(Function_Statement());
+                Function_StatementsDash_AUX(function_statementsdash);
+            }
+        }
+        Node Function_Statement()
+        {
+            Node function_statement = new Node("Function_Statement");
+
+            function_statement.Children.Add(Function_Declaration());
+            function_statement.Children.Add(Function_Body());
+
+            return function_statement;
+        }
+        Node Function_Declaration()
+        {
+            Node function_declaration = new Node("Function_Declaration");
+
+            function_declaration.Children.Add(Datatype());
+            function_declaration.Children.Add(FunctionName());
+            function_declaration.Children.Add(match(Token_Class.T_LPAREN));
+            function_declaration.Children.Add(ParameterList());
+            function_declaration.Children.Add(match(Token_Class.T_RPAREN));
+
+            return function_declaration;
+        }
+
+        Node ParameterList()
+        {
+            Node parameterlist = new Node("ParameterList");
+
+            // trace back this condition to the Datatype in Parameter
+            if (InputPointer < TokenStream.Count && (TokenStream[InputPointer].token_type == Token_Class.T_INT || TokenStream[InputPointer].token_type == Token_Class.T_FLOAT || TokenStream[InputPointer].token_type == Token_Class.T_STRING))
+            {
+                parameterlist.Children.Add(Parameters());
+            }
+
+            return parameterlist;
+        }
+
+        Node Parameters()
+        {
+            Node parameters = new Node("Parameters");
+            parameters.Children.Add(Parameter());
+            Parameters_AUX(parameters);
+            return parameters;
+        }
+
+        void Parameters_AUX(Node parameters)
+        {
+            if (InputPointer < TokenStream.Count && TokenStream[InputPointer].token_type == Token_Class.T_COMMA)
+            {
+                parameters.Children.Add(match(Token_Class.T_COMMA));
+                parameters.Children.Add(Parameter());
+                Parameters_AUX(parameters);
+            }
+        }
+
+        Node Function_Body()
+        {
+            Node function_body = new Node("Function_Body");
+
+            function_body.Children.Add(match(Token_Class.T_LCURLY));
+            function_body.Children.Add(Statements());
+            function_body.Children.Add(Return_Statement());
+            function_body.Children.Add(match(Token_Class.T_RCURLY));
+
+            return function_body;
+        }
+        Node Statements()
+        {
+            Node statements = new Node("Statements");
+            statements.Children.Add(StatementsDash());
+            return statements;
+        }
+
+        Node StatementsDash()
+        {
+            Node statementsdash = new Node("StatementsDash");
+
+            if (InputPointer < TokenStream.Count &&
+            (TokenStream[InputPointer].token_type == Token_Class.T_INT ||
+            TokenStream[InputPointer].token_type == Token_Class.T_FLOAT ||
+            TokenStream[InputPointer].token_type == Token_Class.T_STRING ||
+            TokenStream[InputPointer].token_type == Token_Class.T_READ ||
+            TokenStream[InputPointer].token_type == Token_Class.T_WRITE ||
+            TokenStream[InputPointer].token_type == Token_Class.T_IF ||
+            TokenStream[InputPointer].token_type == Token_Class.T_REPEAT ||
+            TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER))
+            {
+                statementsdash.Children.Add(Statement());
+                StatementsDash_AUX(statementsdash);
+            }
+
+            return statementsdash;
+        }
+
+        void StatementsDash_AUX(Node statementsdash)
+        {
+            if (InputPointer < TokenStream.Count &&
+            (TokenStream[InputPointer].token_type == Token_Class.T_INT ||
+            TokenStream[InputPointer].token_type == Token_Class.T_FLOAT ||
+            TokenStream[InputPointer].token_type == Token_Class.T_STRING ||
+            TokenStream[InputPointer].token_type == Token_Class.T_READ ||
+            TokenStream[InputPointer].token_type == Token_Class.T_WRITE ||
+            TokenStream[InputPointer].token_type == Token_Class.T_IF ||
+            TokenStream[InputPointer].token_type == Token_Class.T_REPEAT ||
+            TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER))
+            {
+                statementsdash.Children.Add(Statement());
+                StatementsDash_AUX(statementsdash);
+            }
+        }
+
+        Node Statement()
+        {
+            Node statement = new Node("Statement");
+
+            if(InputPointer < TokenStream.Count)
+            {
+                // Declaration
+                if (TokenStream[InputPointer].token_type == Token_Class.T_INT || TokenStream[InputPointer].token_type == Token_Class.T_FLOAT || TokenStream[InputPointer].token_type == Token_Class.T_STRING)
+                {
+                    statement.Children.Add(Declaration_Statement());
+                }
+                // Read
+                else if(TokenStream[InputPointer].token_type == Token_Class.T_READ)
+                {
+                    statement.Children.Add(Read_Statement());
+                }
+                // Write
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_WRITE)
+                {
+                    statement.Children.Add(Write_Statement());
+                }
+                // If
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_IF)
+                {
+                    statement.Children.Add(If_Statement());
+                }
+                // Repeat
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_REPEAT)
+                {
+                    statement.Children.Add(Repeat_Statement());
+                }
+                // Function Call or Assignment
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER)
+                {
+                    if (InputPointer + 1 < TokenStream.Count)
+                    {
+                        // Function Call
+                        if (TokenStream[InputPointer + 1].token_type == Token_Class.T_LPAREN)
+                        {
+                            statement.Children.Add(Function_Call());
+                        }
+                        // Assignment
+                        else if(TokenStream[InputPointer + 1].token_type == Token_Class.T_ASSIGN)
+                        {
+                            statement.Children.Add(Assignment_Statement());
+                        }
+                        // Error
+                        else
+                        {
+                            Errors.Error_List.Add("Parsing Error: Expected function call or assignment "
+                             + " and " +
+                            TokenStream[InputPointer].token_type.ToString() +
+                            "  found\r\n");
+                            InputPointer++;
+                        }
+                    }
+                }
+                // Error
+                else
+                {
+                    Errors.Error_List.Add("Parsing Error: Expected statement "
+                             + " and " +
+                            TokenStream[InputPointer].token_type.ToString() +
+                            "  found\r\n");
+                    InputPointer++;
+                }
+            }
+
+            return statement;
+        }
+
+        Node Main_Function()
+        {
+            Node main_function = new Node("Main_Function");
+
+            main_function.Children.Add(Datatype());
+            main_function.Children.Add(match(Token_Class.T_MAIN));
+            main_function.Children.Add(match(Token_Class.T_LPAREN));
+            main_function.Children.Add(match(Token_Class.T_RPAREN));
+            main_function.Children.Add(Function_Body());
+
+            return main_function;
+        }
+
+        /* END OF MORSI BLOCK */
+
         Node FunctionHeader()
         {
             Node header = new Node("Header");
@@ -125,7 +352,7 @@ namespace JASON_Compiler
             return Idlist;
         }
         */
-        
+
         /*
         void IdenList(Node Idlist)
         {
@@ -157,7 +384,7 @@ namespace JASON_Compiler
         }*/
 
         // Implement your logic here
-        
+
         public Node match(Token_Class ExpectedToken)
         {
 
@@ -185,7 +412,7 @@ namespace JASON_Compiler
             else
             {
                 Errors.Error_List.Add("Parsing Error: Expected "
-                        + ExpectedToken.ToString()  + "\r\n");
+                        + ExpectedToken.ToString() + "\r\n");
                 InputPointer++;
                 return null;
             }
