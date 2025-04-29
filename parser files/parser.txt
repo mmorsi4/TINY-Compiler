@@ -441,5 +441,144 @@ namespace JASON_Compiler
             }
             return tree;
         }
+
+Node Function_Call()
+{
+    Node function_call = new Node("Function_Call");
+
+    function_call.Children.Add(match(Token_Class.T_IDENTIFIER));
+    function_call.Children.Add(match(Token_Class.T_LPAREN));
+    function_call.Children.Add(ArgumentList());
+    function_call.Children.Add(match(Token_Class.T_RPAREN));
+
+    return function_call;
+}
+
+Node ArgumentList()
+{
+    Node argument_list = new Node("ArgumentList");
+
+    if (InputPointer < TokenStream.Count &&
+        TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER)
+    {
+        argument_list.Children.Add(Arguments());
+    }
+    // else epsilon (empty)
+
+    return argument_list;
+}
+
+Node Arguments()
+{
+    Node arguments = new Node("Arguments");
+
+    arguments.Children.Add(match(Token_Class.T_IDENTIFIER));
+    ArgumentsDash(arguments);
+
+    return arguments;
+}
+
+void ArgumentsDash(Node arguments)
+{
+    if (InputPointer < TokenStream.Count &&
+        TokenStream[InputPointer].token_type == Token_Class.T_COMMA)
+    {
+        arguments.Children.Add(match(Token_Class.T_COMMA));
+        arguments.Children.Add(match(Token_Class.T_IDENTIFIER));
+        ArgumentsDash(arguments);
+    }
+}
+
+Node Return_Statement()
+{
+    Node return_statement = new Node("Return_Statement");
+
+    return_statement.Children.Add(match(Token_Class.T_RETURN));
+    return_statement.Children.Add(Expression());
+    return_statement.Children.Add(match(Token_Class.T_SEMICOLON));
+
+    return return_statement;
+}
+
+Node Condition()
+{
+    Node condition = new Node("Condition");
+
+    condition.Children.Add(match(Token_Class.T_IDENTIFIER));
+    condition.Children.Add(Condition_Operator());
+    condition.Children.Add(Term());
+
+    return condition;
+}
+
+Node Condition_Operator()
+{
+    Node condition_operator = new Node("Condition_Operator");
+
+    if (InputPointer < TokenStream.Count &&
+        (TokenStream[InputPointer].token_type == Token_Class.T_EQUAL ||
+         TokenStream[InputPointer].token_type == Token_Class.T_LESSTHAN ||
+         TokenStream[InputPointer].token_type == Token_Class.T_GREATERTHAN))
+    {
+        condition_operator.Children.Add(match(TokenStream[InputPointer].token_type));
+    }
+    else
+    {
+        Errors.Error_List.Add("Parsing Error: Expected Condition Operator at " +
+            TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+        InputPointer++;
+    }
+
+    return condition_operator;
+}
+
+
+
+Node Condition_Statement()
+{
+    Node condition_statement = new Node("Condition_Statement");
+
+    condition_statement.Children.Add(Condition());
+    Condition_StatementDash(condition_statement);
+
+    return condition_statement;
+}
+
+void Condition_StatementDash(Node condition_statement)
+{
+    if (InputPointer < TokenStream.Count &&
+        (TokenStream[InputPointer].token_type == Token_Class.T_AND ||
+         TokenStream[InputPointer].token_type == Token_Class.T_OR))
+    {
+        condition_statement.Children.Add(Boolean_Operator());
+        condition_statement.Children.Add(Condition());
+        Condition_StatementDash(condition_statement);
+    }
+}
+
+Node Boolean_Operator()
+{
+    Node boolean_operator = new Node("Boolean_Operator");
+
+    if (InputPointer < TokenStream.Count)
+    {
+        if (TokenStream[InputPointer].token_type == Token_Class.T_AND)
+        {
+            boolean_operator.Children.Add(match(Token_Class.T_AND));
+        }
+        else if (TokenStream[InputPointer].token_type == Token_Class.T_OR)
+        {
+            boolean_operator.Children.Add(match(Token_Class.T_OR));
+        }
+        else
+        {
+            Errors.Error_List.Add("Parsing Error: Expected Boolean Operator at " +
+                TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+            InputPointer++;
+        }
+    }
+
+    return boolean_operator;
+}
     }
 }
