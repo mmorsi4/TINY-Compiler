@@ -58,7 +58,7 @@ namespace JASON_Compiler
 
             // trace back this condition to the Datatype in Function_Declaration
             if (InputPointer < TokenStream.Count && (TokenStream[InputPointer].token_type == Token_Class.T_INT || TokenStream[InputPointer].token_type == Token_Class.T_FLOAT || TokenStream[InputPointer].token_type == Token_Class.T_STRING))
-            { 
+            {
                 function_statementsdash.Children.Add(Function_Statement());
                 Function_StatementsDash_AUX(function_statementsdash);
             }
@@ -188,7 +188,7 @@ namespace JASON_Compiler
         {
             Node statement = new Node("Statement");
 
-            if(InputPointer < TokenStream.Count)
+            if (InputPointer < TokenStream.Count)
             {
                 // Declaration
                 if (TokenStream[InputPointer].token_type == Token_Class.T_INT || TokenStream[InputPointer].token_type == Token_Class.T_FLOAT || TokenStream[InputPointer].token_type == Token_Class.T_STRING)
@@ -196,7 +196,7 @@ namespace JASON_Compiler
                     statement.Children.Add(Declaration_Statement());
                 }
                 // Read
-                else if(TokenStream[InputPointer].token_type == Token_Class.T_READ)
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_READ)
                 {
                     statement.Children.Add(Read_Statement());
                 }
@@ -226,7 +226,7 @@ namespace JASON_Compiler
                             statement.Children.Add(Function_Call());
                         }
                         // Assignment
-                        else if(TokenStream[InputPointer + 1].token_type == Token_Class.T_ASSIGN)
+                        else if (TokenStream[InputPointer + 1].token_type == Token_Class.T_ASSIGN)
                         {
                             statement.Children.Add(Assignment_Statement());
                         }
@@ -269,6 +269,230 @@ namespace JASON_Compiler
         }
 
         /* END OF MORSI BLOCK */
+
+
+
+        /* START OF YOUSSEF BLOCK*/
+
+        Node If_Statement()
+        {
+            Node if_statement = new Node("If_Statement");
+
+            if(InputPointer+4 < TokenStream.Count)
+            {
+
+                if (TokenStream[InputPointer].token_type == Token_Class.T_IF && TokenStream[InputPointer+4].token_type==Token_Class.T_END)
+                {
+                    if_statement.Children.Add(match(Token_Class.T_IF));
+                    Unmatched(if_statement);
+
+
+                }
+
+                else if(TokenStream[InputPointer].token_type == Token_Class.T_IF&&(TokenStream[InputPointer].token_type == Token_Class.T_ELSEIF|| TokenStream[InputPointer].token_type == Token_Class.T_ELSE))
+                {
+                    if_statement.Children.Add(match(Token_Class.T_IF));
+                    Matched(if_statement);
+                }
+
+
+                else
+                {
+
+                    Errors.Error_List.Add("Parsing Error: Expected if "
+                            +"  found\r\n"+ TokenStream[InputPointer].token_type.ToString();
+                    InputPointer++;
+
+                }
+
+            }
+
+            else if(InputPointer  < TokenStream.Count & TokenStream[InputPointer].token_type == Token_Class.T_IF )
+            {
+                Errors.Error_List.Add("Parsing Error: Expected if statement but what was "
+                           + "  found\r\n" + "incomplete if statement");
+                InputPointer++;
+
+            }
+
+            return if_statement;
+
+
+        }
+
+        void Unmatched(Node if_statement)
+        {
+
+            if (InputPointer < TokenStream.Count)
+            {
+
+                if_statement.Children.Add(Condition_Statement());
+                if_statement.Children.Add(match(Token_Class.T_THEN));
+                if_statement.Children.Add(All_Statements());
+                if_statement.Children.Add(match(Token_Class.T_END));
+            }
+
+            
+
+
+        }
+
+
+        void Matched(Node if_statement)
+        {
+            if (InputPointer < TokenStream.Count)
+            {
+
+                if_statement.Children.Add(Condition_Statement());
+                if_statement.Children.Add(match(Token_Class.T_THEN));
+                All_Statements(if_statement);
+                Follow_Up(if_statement);
+                if_statement.Children.Add(match(Token_Class.T_END));
+
+            }
+        }
+
+
+        void All_Statements(Node if_statement)
+        {
+            if (InputPointer < TokenStream.Count)
+            {
+                if_statement.Children.Add(Statement());
+                All_Statements_Dash(if_statement);
+
+
+            }
+
+
+        }
+
+        void All_Statements_Dash(Node if_statement)
+        {
+            if (InputPointer < TokenStream.Count)
+            {
+                if (TokenStream[InputPointer].token_type == Token_Class.T_INT || TokenStream[InputPointer].token_type == Token_Class.T_FLOAT || TokenStream[InputPointer].token_type == Token_Class.T_STRING
+                    || TokenStream[InputPointer].token_type == Token_Class.T_READ|| TokenStream[InputPointer].token_type == Token_Class.T_WRITE
+                    || TokenStream[InputPointer].token_type == Token_Class.T_IF|| TokenStream[InputPointer].token_type == Token_Class.T_REPEAT)
+                {
+                    if_statement.Children.Add(Statement());
+                    All_Statements_Dash(if_statement);
+                }
+               
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER)
+                {
+                    if (InputPointer + 1 < TokenStream.Count)
+                    {
+                        // Function Call
+                        if (TokenStream[InputPointer + 1].token_type == Token_Class.T_LPAREN|| (TokenStream[InputPointer + 1].token_type == Token_Class.T_ASSIGN)
+                        {
+
+                            if_statement.Children.Add(Statement());
+                            All_Statements_Dash(if_statement);
+
+                        }
+
+                        else
+                        {
+                            Errors.Error_List.Add("Parsing Error: Expected function call or assignment "
+                             + " and " +
+                            TokenStream[InputPointer].token_type.ToString() +
+                            "  found\r\n");
+                            InputPointer++;
+                        }
+                    }
+                }
+
+            }
+
+
+        }
+
+        void Follow_Up(Node if_statement)
+        {
+            if (InputPointer < TokenStream.Count)
+            {
+
+                if (TokenStream[InputPointer].token_type == Token_Class.T_ELSEIF)
+                {
+                    if_statement.Children.Add(Else_If_Statement());
+                }
+
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_ELSE)
+                {
+                    if_statement.Children.Add(Else_Statement());
+                }
+
+                else
+                {
+                    Errors.Error_List.Add("Parsing Error: Expected elseif or else "
+                            + "  found\r\n" + TokenStream[InputPointer].token_type.ToString());
+                    InputPointer++;
+
+                }
+
+            } 
+
+
+        }
+
+        Node Else_If_Statement()
+        {
+            Node else_if_statement = new Node("If_Statement");
+
+            if (InputPointer < TokenStream.Count)
+            {
+
+
+                else_if_statement.Children.Add(match(Token_Class.T_ELSEIF));
+                else_if_statement.Children.Add(Condition_Statement());
+                else_if_statement.Children.Add(match(Token_Class.T_THEN));
+                All_Statements(else_if_statement);
+
+                if (TokenStream[InputPointer].token_type == Token_Class.T_ELSEIF)
+                {
+                    else_if_statement.Children.Add(Else_If_Statement());
+                }
+
+                else if (TokenStream[InputPointer].token_type == Token_Class.T_ELSE)
+                {
+                    else_if_statement.Children.Add(Else_Statement());
+                }
+
+
+
+
+
+
+            }
+
+
+
+
+                return else_if_statement;
+
+        }
+
+        Node Else_Statement()
+        {
+
+            Node else_statement = new Node("If_Statement");
+            else_statement.Children.Add(match(Token_Class.T_ELSE));
+            All_Statements(else_statement);
+
+            return else_statement;
+
+        }
+
+
+
+
+ 
+
+
+
+        /* END OF YOUSSEF BLOCK*/
+
+
 
         Node FunctionHeader()
         {
