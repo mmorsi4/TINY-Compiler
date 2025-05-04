@@ -79,7 +79,6 @@
             this.Column2});
             this.dataGridView1.Location = new System.Drawing.Point(406, 34);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
             this.dataGridView1.Size = new System.Drawing.Size(245, 323);
             this.dataGridView1.TabIndex = 4;
@@ -87,16 +86,12 @@
             // Column1
             // 
             this.Column1.HeaderText = "Lexeme";
-            this.Column1.MinimumWidth = 6;
             this.Column1.Name = "Column1";
-            this.Column1.Width = 125;
             // 
             // Column2
             // 
             this.Column2.HeaderText = "Token Class";
-            this.Column2.MinimumWidth = 6;
             this.Column2.Name = "Column2";
-            this.Column2.Width = 125;
             // 
             // dataGridView2
             // 
@@ -106,7 +101,6 @@
             this.dataGridViewTextBoxColumn2});
             this.dataGridView2.Location = new System.Drawing.Point(730, 34);
             this.dataGridView2.Name = "dataGridView2";
-            this.dataGridView2.RowHeadersWidth = 51;
             this.dataGridView2.RowTemplate.Height = 24;
             this.dataGridView2.Size = new System.Drawing.Size(245, 323);
             this.dataGridView2.TabIndex = 5;
@@ -115,16 +109,12 @@
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.HeaderText = "Lexeme";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.Width = 125;
             // 
             // dataGridViewTextBoxColumn2
             // 
             this.dataGridViewTextBoxColumn2.HeaderText = "Token Class";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.Width = 125;
             // 
             // label1
             // 
@@ -132,10 +122,9 @@
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(12, 9);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(108, 22);
+            this.label1.Size = new System.Drawing.Size(134, 24);
             this.label1.TabIndex = 6;
-            this.label1.Text = "TINY Code";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.label1.Text = "JASON Code";
             // 
             // label2
             // 
@@ -143,7 +132,7 @@
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(403, 9);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(143, 22);
+            this.label2.Size = new System.Drawing.Size(147, 24);
             this.label2.TabIndex = 7;
             this.label2.Text = "Token Classes";
             // 
@@ -153,7 +142,7 @@
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.Location = new System.Drawing.Point(727, 9);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(132, 22);
+            this.label3.Size = new System.Drawing.Size(138, 24);
             this.label3.TabIndex = 8;
             this.label3.Text = "Symbol Table";
             // 
@@ -163,7 +152,7 @@
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.Location = new System.Drawing.Point(403, 386);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(93, 22);
+            this.label4.Size = new System.Drawing.Size(94, 24);
             this.label4.TabIndex = 9;
             this.label4.Text = "Error List";
             // 
@@ -171,7 +160,6 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.MenuHighlight;
             this.ClientSize = new System.Drawing.Size(1124, 561);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
