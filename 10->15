@@ -1,0 +1,170 @@
+Node Expression()
+   {
+       Node expression = new Node("Expression");
+       if (InputPointer < TokenStream.Count)
+       {
+           //if term
+         
+           if (TokenStream[InputPointer].token_type == Token_Class.T_NUMBER ||  TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER || TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER && TokenStream[InputPointer++].token_type == Token_Class.T_LPAREN)
+
+           {
+               expression.Children.Add(Term());
+           }
+           else if (TokenStream[InputPointer].token_type==Token_Class.T_STRING)
+           {
+               expression.Children.Add(match(Token_Class.T_STRING));
+           }
+       
+           else if(TokenStream[InputPointer].token_type == Token_Class.T_LPAREN )
+           {
+               expression.Children.Add(Equation());
+           }
+           else
+           {
+               Errors.Error_List.Add("Parsing Error: Expected Expression at " +
+                  TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+               InputPointer++;
+           }
+
+       }
+       return expression;
+   }
+   Node Assignment_Statement()
+   {
+       Node assignment_statement = new Node("Assignment_Statement");
+       if (InputPointer < TokenStream.Count)
+       {
+               assignment_statement.Children.Add(match(Token_Class.T_IDENTIFIER));
+           assignment_statement.Children.Add(match(Token_Class.T_ASSIGN));
+           assignment_statement.Children.Add(Expression());
+
+       }
+       
+           return assignment_statement;
+   }
+   Node DataType()
+   {
+       Node datatype = new Node("Datatype");
+       if(InputPointer<TokenStream.Count)
+       {
+           if (TokenStream[InputPointer].token_type==Token_Class.T_STRING)
+           {
+               datatype.Children.Add(match(Token_Class.T_STRING));
+           }
+           else if(TokenStream[InputPointer].token_type == Token_Class.T_FLOAT)
+           {
+               datatype.Children.Add(match(Token_Class.T_FLOAT));
+           }
+           else if (TokenStream[InputPointer].token_type == Token_Class.T_INT)
+           {
+               datatype.Children.Add(match(Token_Class.T_INT));
+           }
+           else
+           {
+                     Errors.Error_List.Add("Parsing Error: Expected datatype at " +
+                  TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+               InputPointer++;
+           }
+       }
+
+       return datatype;
+   }
+   Node Declaration_Statement()
+   {
+       Node decl_statement= new Node("Declaration_Statement");
+       decl_statement.Children.Add(DataType());
+       decl_statement.Children.Add(IDList());
+
+
+
+
+       return decl_statement;
+   }
+   Node IDList()
+   {
+       Node idList = new Node("IDList");
+       if(InputPointer< TokenStream.Count)
+       {
+           if (TokenStream[InputPointer].token_type==Token_Class.T_IDENTIFIER)
+           {
+               idList.Children.Add(match(Token_Class.T_IDENTIFIER));
+               IDListAUX(idList);
+           }
+       }
+      
+
+       return idList;
+   }
+   Node IDListAUX(Node idlist)
+   {
+       Node idlistAux = new Node("IDListAUX");
+       if(InputPointer<TokenStream.Count)
+       {
+           if(TokenStream[InputPointer].token_type == Token_Class.T_COMMA)
+           {
+               idlistAux.Children.Add(match(Token_Class.T_COMMA));
+               idlistAux.Children.Add(match(Token_Class.T_IDENTIFIER));
+           }
+           InputPointer += 2;
+           if(TokenStream[InputPointer+ 3].token_type== Token_Class.T_ASSIGN)
+           {
+               idlistAux.Children.Add(match(Token_Class.T_ASSIGN));
+               idlistAux.Children.Add(Expression());
+               IDListAUX(idlist);
+           }
+           else if (TokenStream[InputPointer+3].token_type==Token_Class.T_COMMA)
+           {
+               IDListAUX(idlist);
+           }
+           else
+           {
+               Errors.Error_List.Add("Parsing Error: Expected idlistAUx at " +
+           TokenStream[InputPointer].token_type.ToString() + " found\r\n");
+               InputPointer++;
+           }
+       }
+
+       return idlistAux;
+   }
+
+   Node Write_Statement()
+   {
+       Node write_statement = new Node("Write_Statement");
+       write_statement.Children.Add(match(Token_Class.T_WRITE));
+       Write_statement_option();
+       return write_statement;
+   }
+   Node Write_statement_option()
+   {
+       Node write_statement_option = new Node("Write_statement_option");
+       if (InputPointer<TokenStream.Count)
+           //eqn start with lparen or term
+           //term is num or id or fn_call
+           //fn_call is id followed by lparen
+       {                                                                       //term (fn call)                                                                                                                                                               //term (num )                      term (id)                                                   //eqn
+           if (TokenStream[InputPointer].token_type == Token_Class.T_STRING || (TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER && TokenStream[InputPointer++].token_type == Token_Class.T_LPAREN) || (TokenStream[InputPointer].token_type == Token_Class.T_NUMBER) || TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER || TokenStream[InputPointer].token_type == Token_Class.T_LPAREN)
+               write_statement_option.Children.Add(Expression());
+           else if(TokenStream[InputPointer].token_type==Token_Class.T_ENDL)
+           {
+               write_statement_option.Children.Add(match(Token_Class.T_ENDL));
+           }
+           else
+           {
+               Errors.Error_List.Add("Parsing Error: Expected expression or endl "
+                        + 
+                       TokenStream[InputPointer].token_type.ToString() +
+                       "  found\r\n");
+               InputPointer++;
+
+           }
+
+       }
+       return write_statement_option;
+   }
+   Node Read_Statement()
+   {
+       Node read_statement = new Node("Read_Statement");
+       read_statement.Children.Add(match(Token_Class.T_READ));
+       read_statement.Children.Add(match(Token_Class.T_IDENTIFIER));
+       return read_statement;
+   }
