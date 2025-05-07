@@ -459,7 +459,8 @@ Node ArgumentList()
     Node argument_list = new Node("ArgumentList");
 
     if (InputPointer < TokenStream.Count &&
-        TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER)
+        (TokenStream[InputPointer].token_type == Token_Class.T_IDENTIFIER ||
+         TokenStream[InputPointer].token_type == Token_Class.T_NUMBER))
     {
         argument_list.Children.Add(Arguments());
     }
@@ -472,7 +473,7 @@ Node Arguments()
 {
     Node arguments = new Node("Arguments");
 
-    arguments.Children.Add(match(Token_Class.T_IDENTIFIER));
+    arguments.Children.Add(Term());
     ArgumentsDash(arguments);
 
     return arguments;
@@ -484,10 +485,13 @@ void ArgumentsDash(Node arguments)
         TokenStream[InputPointer].token_type == Token_Class.T_COMMA)
     {
         arguments.Children.Add(match(Token_Class.T_COMMA));
-        arguments.Children.Add(match(Token_Class.T_IDENTIFIER));
+        arguments.Children.Add(Term()); 
         ArgumentsDash(arguments);
     }
 }
+
+
+
 
 Node Return_Statement()
 {
